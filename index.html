@@ -90,9 +90,19 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            margin: 0 auto 20px auto;
         }
         .captcha-image:hover {
             background-color: #555;
+        }
+        .captcha-input {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #444;
+            color: #fff;
         }
     </style>
 </head>
@@ -128,8 +138,9 @@
             <!-- CAPTCHA Section -->
             <div class="captcha-container">
                 <h3>Solve CAPTCHA</h3>
-                <div class="captcha-image" id="captcha-image" onclick="submitCaptcha()"> </div> <!-- CAPTCHA image will be generated here -->
-                <input type="text" id="captcha-input" placeholder="Enter CAPTCHA" style="margin-top: 10px;" required>
+                <div class="captcha-image" id="captcha-image" onclick="generateCaptcha()"> </div> <!-- CAPTCHA image will be generated here -->
+                <input type="text" id="captcha-input" class="captcha-input" placeholder="Enter CAPTCHA" required>
+                <button onclick="submitCaptcha()">Submit</button>
             </div>
 
             <!-- Withdraw Section -->
@@ -220,6 +231,108 @@
                     updateBalance();
                     alert('CAPTCHA solved successfully! 1₹ credited to your balance.');
                     generateCaptcha(); // Generate new CAPTCHA
+                    document.getElementById('captcha-input').value = ''; // Clear input field
+                } else {
+                    alert('Invalid CAPTCHA. Please try again.');
+                    generateCaptcha(); // Generate new CAPTCHA
+                }
+            } else {
+                alert('Please log in first.');
+            }
+        }
+
+        function withdraw() {
+            const upi = document.getElementById('upi').value;
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            if (amount > balance) {
+                alert('Insufficient balance!');
+                return;
+            }
+            balance -= amount;
+            updateBalance();
+            addToHistory(amount, upi);
+        }
+
+        function updateBalance() {
+            document.getElementById('balance-amount').innerText = `${balance.toFixed(2)} ₹`;
+            document.getElementById('balance-usd').innerText = `${(balance / 82).toFixed(2)}`; // Assuming 1 USD = 82 INR
+        }
+
+        function loadHistory() {
+            const historyBody = document.getElementById('history-body');
+            historyBody.innerHTML = ''; // Clear previous entries
+
+            // Simulated history data (remove example entries)
+            /*
+            const history = [
+                { date: '2023-01-01',
+                                <tbody id="history-body">
+                        <!-- History items will be added dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let users = []; // Simulated user database
+        let currentUser = null;
+        let balance = 0; // Simulated balance
+
+        function register() {
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+
+            // Check if email is already registered
+            const existingUser = users.find(user => user.email === email);
+            if (existingUser) {
+                alert('Email already registered. Please log in.');
+                return;
+            }
+
+            // Register new user
+            const newUser = { email, password, balance: 0 };
+            users.push(newUser);
+            alert('Registration successful! Please log in.');
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+        }
+
+        function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            // Find user in database
+            currentUser = users.find(user => user.email === email && user.password === password);
+            if (currentUser) {
+                alert('Login successful!');
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('user-email').innerText = currentUser.email;
+                updateBalance();
+                loadHistory();
+                generateCaptcha();
+            } else {
+                alert('Invalid email or password. Please try again.');
+            }
+        }
+
+        function generateCaptcha() {
+            const captchaImage = document.getElementById('captcha-image');
+            const captchaValue = Math.random().toString(36).substr(2, 4).toUpperCase();
+            captchaImage.innerText = captchaValue;
+        }
+
+        function submitCaptcha() {
+            if (currentUser) {
+                const captchaInput = document.getElementById('captcha-input').value;
+                const captchaValue = document.getElementById('captcha-image').innerText;
+                if (captchaInput && captchaInput.toUpperCase() === captchaValue) {
+                    balance += 1;
+                    updateBalance();
+                    alert('CAPTCHA solved successfully! 1₹ credited to your balance.');
+                    generateCaptcha(); // Generate new CAPTCHA
+                    document.getElementById('captcha-input').value = ''; // Clear input field
                 } else {
                     alert('Invalid CAPTCHA. Please try again.');
                     generateCaptcha(); // Generate new CAPTCHA
