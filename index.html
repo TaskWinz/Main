@@ -155,52 +155,55 @@
     </div>
 
     <script>
-        let balance = 0; // Simulated balance
+        let users = []; // Simulated user database
         let currentUser = null;
+        let balance = 0; // Simulated balance
 
-        // Function to simulate registration
         function register() {
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
-            
-            // Simulated registration logic
-            if (email && password) {
-                alert('Registration successful! You can now log in.');
-                document.getElementById('register-form').style.display = 'none';
-                document.getElementById('login-form').style.display = 'block';
-            } else {
-                alert('Please enter valid details.');
+
+            // Check if email is already registered
+            const existingUser = users.find(user => user.email === email);
+            if (existingUser) {
+                alert('Email already registered. Please log in.');
+                return;
             }
+
+            // Register new user
+            const newUser = { email, password, balance: 0 };
+            users.push(newUser);
+            alert('Registration successful! Please log in.');
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
         }
 
-        // Function to simulate login
         function login() {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-            
-            // Simulated login logic (replace with actual authentication)
-            if (email === 'test@example.com' && password === 'password') {
-                currentUser = { email: email, balance: balance };
+
+            // Find user in database
+            currentUser = users.find(user => user.email === email && user.password === password);
+            if (currentUser) {
+                alert('Login successful!');
                 document.getElementById('login-form').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
-                document.getElementById('user-email').innerText = email;
+                document.getElementById('user-email').innerText = currentUser.email;
                 updateBalance();
-                loadHistory(); // Simulated load history
+                loadHistory();
             } else {
                 alert('Invalid email or password. Please try again.');
             }
         }
 
-        // Function to show CAPTCHA form
         function showCaptcha() {
             document.getElementById('captcha-form').style.display = 'block';
         }
 
-        // Function to simulate submitting CAPTCHA
         function submitCaptcha() {
             const captchaInput = document.getElementById('captcha-input').value;
-            if (captchaInput === '1234') { // Simulated CAPTCHA validation
-                balance += 1; // Earn 1₹ for solving CAPTCHA
+            if (captchaInput === '1234') {
+                balance += 1;
                 updateBalance();
                 alert('CAPTCHA solved successfully! 1₹ credited to your balance.');
                 document.getElementById('captcha-form').style.display = 'none';
@@ -210,7 +213,6 @@
             }
         }
 
-        // Function to simulate withdrawing money
         function withdraw() {
             const upi = document.getElementById('upi').value;
             const amount = parseFloat(document.getElementById('withdraw-amount').value);
@@ -218,45 +220,43 @@
                 alert('Insufficient balance!');
                 return;
             }
-            // Simulated deduct balance
             balance -= amount;
             updateBalance();
-            addToHistory(amount, upi); // Simulated add to history
+            addToHistory(amount, upi);
         }
 
-        // Function to update balance display
         function updateBalance() {
-            const balanceDisplay = document.getElementById('balance-amount');
-            balanceDisplay.innerText = `${balance.toFixed(2)} ₹`;
-            const balanceUSD = (balance / 82).toFixed(2); // Assuming 1 USD = 82 INR
-            document.getElementById('balance-usd').innerText = balanceUSD;
+            document.getElementById('balance-amount').innerText = `${balance.toFixed(2)} ₹`;
+            document.getElementById('balance-usd').innerText = `${(balance / 82).toFixed(2)}`; // Assuming 1 USD = 82 INR
         }
 
-        // Function to simulate loading withdraw history
         function loadHistory() {
             const historyBody = document.getElementById('history-body');
+            historyBody.innerHTML = ''; // Clear previous entries
+
             // Simulated history data
             const history = [
                 { date: '2023-01-01', amount: 20.00, upi: 'example@upi', orderId: generateOrderId() },
                 { date: '2023-01-15', amount: 15.00, upi: 'user@upi', orderId: generateOrderId() }
             ];
+
             history.forEach(item => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${item.date}</td>
-                                       <td>${item.upi}</td>
+                    <td>${item.amount.toFixed(2)} ₹</td>
+                    <td>${item.upi}</td>
                     <td>${item.orderId}</td>
                 `;
                 historyBody.appendChild(row);
             });
         }
 
-        // Function to add an entry to the history
         function addToHistory(amount, upi) {
             const historyBody = document.getElementById('history-body');
             const date = new Date().toISOString().split('T')[0];
             const orderId = generateOrderId();
-            const row = document.createElement('tr');
+                       const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${date}</td>
                 <td>${amount.toFixed(2)} ₹</td>
@@ -266,7 +266,6 @@
             historyBody.appendChild(row);
         }
 
-        // Function to generate a random order ID
         function generateOrderId() {
             return 'ORDER-' + Math.random().toString(36).substr(2, 9).toUpperCase();
         }
