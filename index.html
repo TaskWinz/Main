@@ -8,7 +8,8 @@
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #f0f2f5;
+            background-color: #1f1f1f;
+            color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -16,7 +17,7 @@
             margin: 0;
         }
         .container {
-            background-color: #fff;
+            background-color: #333;
             padding: 30px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
@@ -26,14 +27,16 @@
         }
         .container h2 {
             margin-bottom: 20px;
-            color: #333;
+            color: #fff;
         }
         .form-container input {
             width: calc(100% - 20px);
             padding: 10px;
             margin: 10px 0;
-            border: 1px solid #ccc;
+            border: 1px solid #555;
             border-radius: 5px;
+            background-color: #444;
+            color: #fff;
         }
         .form-container button {
             background-color: #007bff;
@@ -64,22 +67,23 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
+            color: #fff;
         }
         .history table th, .history table td {
-            border: 1px solid #ccc;
+            border: 1px solid #555;
             padding: 8px;
         }
         .captcha-image {
             width: 100px;
             height: 50px;
-            background-color: #ccc;
+            background-color: #444;
             margin: 10px auto;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 24px;
             font-weight: bold;
-            color: #333;
+            color: #fff;
             border-radius: 5px;
         }
     </style>
@@ -146,7 +150,7 @@
         <!-- CAPTCHA Form -->
         <div class="captcha-container" id="captcha-form" style="display: none;">
             <h3>Solve CAPTCHA</h3>
-            <div class="captcha-image" id="captcha-image">1234</div> <!-- Simulated CAPTCHA image -->
+            <div class="captcha-image" id="captcha-image"> </div> <!-- CAPTCHA image will be generated here -->
             <div class="form-container">
                 <input type="text" id="captcha-input" placeholder="Enter CAPTCHA" required>
                 <button onclick="submitCaptcha()">Submit</button>
@@ -198,11 +202,19 @@
 
         function showCaptcha() {
             document.getElementById('captcha-form').style.display = 'block';
+            generateCaptcha();
+        }
+
+        function generateCaptcha() {
+            const captchaImage = document.getElementById('captcha-image');
+            const captchaValue = Math.random().toString(36).substr(2, 4).toUpperCase();
+            captchaImage.innerText = captchaValue;
         }
 
         function submitCaptcha() {
             const captchaInput = document.getElementById('captcha-input').value;
-            if (captchaInput === '1234') {
+            const captchaValue = document.getElementById('captcha-image').innerText;
+            if (captchaInput.toUpperCase() === captchaValue) {
                 balance += 1;
                 updateBalance();
                 alert('CAPTCHA solved successfully! 1₹ credited to your balance.');
@@ -210,6 +222,7 @@
                 document.getElementById('captcha-input').value = '';
             } else {
                 alert('Invalid CAPTCHA. Please try again.');
+                generateCaptcha(); // Generate new CAPTCHA
             }
         }
 
@@ -234,29 +247,22 @@
             const historyBody = document.getElementById('history-body');
             historyBody.innerHTML = ''; // Clear previous entries
 
-            // Simulated history data
+            // Simulated history data (remove example entries)
+            /*
             const history = [
                 { date: '2023-01-01', amount: 20.00, upi: 'example@upi', orderId: generateOrderId() },
                 { date: '2023-01-15', amount: 15.00, upi: 'user@upi', orderId: generateOrderId() }
             ];
+            */
 
-            history.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.date}</td>
-                    <td>${item.amount.toFixed(2)} ₹</td>
-                    <td>${item.upi}</td>
-                    <td>${item.orderId}</td>
-                `;
-                historyBody.appendChild(row);
-            });
+            // Add your actual history data handling here
         }
 
-        function addToHistory(amount, upi) {
+        function addToHistory(amount , upi) {
             const historyBody = document.getElementById('history-body');
             const date = new Date().toISOString().split('T')[0];
             const orderId = generateOrderId();
-                       const row = document.createElement('tr');
+            const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${date}</td>
                 <td>${amount.toFixed(2)} ₹</td>
