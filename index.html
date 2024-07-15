@@ -59,25 +59,28 @@
             font-size: 18px;
             color: #007bff;
         }
-        .history, .captcha-container, .withdraw-container {
+        .history, .withdraw-container {
             margin-top: 20px;
             text-align: left;
+            color: #fff;
         }
         .history table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
-            color: #fff;
         }
         .history table th, .history table td {
             border: 1px solid #555;
             padding: 8px;
         }
+        .captcha-container {
+            margin-top: 20px;
+            text-align: center;
+        }
         .captcha-image {
-            width: 100px;
-            height: 50px;
+            width: 150px;
+            height: 70px;
             background-color: #444;
-            margin: 10px auto;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -85,6 +88,11 @@
             font-weight: bold;
             color: #fff;
             border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .captcha-image:hover {
+            background-color: #555;
         }
     </style>
 </head>
@@ -116,7 +124,12 @@
             <div class="balance">
                 Balance: <span id="balance-amount">0 ₹</span> (~<span id="balance-usd">0</span>$)
             </div>
-            <button onclick="showCaptcha()">Solve CAPTCHA</button>
+
+            <!-- CAPTCHA Section -->
+            <div class="captcha-container">
+                <h3>Solve CAPTCHA</h3>
+                <div class="captcha-image" id="captcha-image" onclick="submitCaptcha()"> </div> <!-- CAPTCHA image will be generated here -->
+            </div>
 
             <!-- Withdraw Section -->
             <div class="withdraw-container" id="withdraw-form">
@@ -144,16 +157,6 @@
                         <!-- History items will be added dynamically -->
                     </tbody>
                 </table>
-            </div>
-        </div>
-
-        <!-- CAPTCHA Form -->
-        <div class="captcha-container" id="captcha-form" style="display: none;">
-            <h3>Solve CAPTCHA</h3>
-            <div class="captcha-image" id="captcha-image"> </div> <!-- CAPTCHA image will be generated here -->
-            <div class="form-container">
-                <input type="text" id="captcha-input" placeholder="Enter CAPTCHA" required>
-                <button onclick="submitCaptcha()">Submit</button>
             </div>
         </div>
     </div>
@@ -195,14 +198,10 @@
                 document.getElementById('user-email').innerText = currentUser.email;
                 updateBalance();
                 loadHistory();
+                generateCaptcha();
             } else {
                 alert('Invalid email or password. Please try again.');
             }
-        }
-
-        function showCaptcha() {
-            document.getElementById('captcha-form').style.display = 'block';
-            generateCaptcha();
         }
 
         function generateCaptcha() {
@@ -212,17 +211,20 @@
         }
 
         function submitCaptcha() {
-            const captchaInput = document.getElementById('captcha-input').value;
-            const captchaValue = document.getElementById('captcha-image').innerText;
-            if (captchaInput.toUpperCase() === captchaValue) {
-                balance += 1;
-                updateBalance();
-                alert('CAPTCHA solved successfully! 1₹ credited to your balance.');
-                document.getElementById('captcha-form').style.display = 'none';
-                document.getElementById('captcha-input').value = '';
+            if (currentUser) {
+                const captchaInput = prompt('Enter the CAPTCHA:', '');
+                const captchaValue = document.getElementById('captcha-image').innerText;
+                if (captchaInput && captchaInput.toUpperCase() === captchaValue) {
+                    balance += 1;
+                    updateBalance();
+                    alert('CAPTCHA solved successfully! 1₹ credited to your balance.');
+                    generateCaptcha(); // Generate new CAPTCHA
+                } else {
+                    alert('Invalid CAPTCHA. Please try again.');
+                    generateCaptcha(); // Generate new CAPTCHA
+                }
             } else {
-                alert('Invalid CAPTCHA. Please try again.');
-                generateCaptcha(); // Generate new CAPTCHA
+                alert('Please log in first.');
             }
         }
 
@@ -258,10 +260,10 @@
             // Add your actual history data handling here
         }
 
-        function addToHistory(amount , upi) {
+        function addToHistory(amount, upi) {
             const historyBody = document.getElementById('history-body');
-            const date = new Date().toISOString().split('T')[0];
-            const orderId = generateOrderId();
+            const date = new Date().toISOString().split('T')[
+                            const orderId = generateOrderId();
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${date}</td>
