@@ -3,286 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Captcha Earning System</title>
+    <title>Captcha Earning Website</title>
     <style>
+        /* Basic styling for demo purposes */
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+            padding: 20px;
         }
         .container {
             max-width: 600px;
-            padding: 20px;
+            margin: 0 auto;
             background-color: #fff;
-            border-radius: 10px;
+            padding: 20px;
+            border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            text-align: center;
         }
-        input, button {
-            margin: 5px;
+        input[type="text"], input[type="password"], button {
+            width: 100%;
             padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            margin: 5px 0;
+            box-sizing: border-box;
         }
         button {
-            cursor: pointer;
             background-color: #4CAF50;
             color: white;
             border: none;
+            cursor: pointer;
         }
         button:hover {
             background-color: #45a049;
         }
-        h1, h2 {
-            color: #333;
-        }
-        #captchaContainer, #balanceContainer, #withdrawHistory {
-            display: none;
+        .dashboard {
             margin-top: 20px;
-            text-align: left;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
         }
-        #withdrawHistory ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        #registeredEmail {
-            font-size: 14px;
-            color: #666;
-        }
-        #balanceDisplay {
-            font-size: 24px;
-            margin-top: 10px;
+        .captcha {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Captcha Earning System</h1>
-        <div id="loginSection">
-            <h2>Login</h2>
-            <form id="loginForm">
-                <input type="text" id="loginUsername" placeholder="Username" required>
-                <input type="password" id="loginPassword" placeholder="Password" required>
-                <button type="submit">Login</button>
-            </form>
-            <p>Don't have an account? <a href="#" id="showRegister">Register here</a></p>
+        <h2>Captcha Earning Website</h2>
+        <div id="loginPage">
+            <h3>Login</h3>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <p>Don't have an account? <a href="#" onclick="showRegister()">Register here</a></p>
         </div>
-        <div id="registerSection" style="display: none;">
-            <h2>Register</h2>
-            <form id="registerForm">
-                <input type="text" id="registerUsername" placeholder="Username" required>
-                <input type="password" id="registerPassword" placeholder="Password" required>
-                <button type="submit">Register</button>
-            </form>
-            <p>Already have an account? <a href="#" id="showLogin">Login here</a></p>
+
+        <div id="registerPage" style="display: none;">
+            <h3>Register</h3>
+            <input type="text" id="newUsername" placeholder="New Username">
+            <input type="password" id="newPassword" placeholder="New Password">
+            <button onclick="register()">Register</button>
+            <p>Already have an account? <a href="#" onclick="showLogin()">Login here</a></p>
         </div>
-        <div id="captchaContainer" style="display: none;">
-            <p id="registeredEmail"></p>
-            <h2>Enter Captcha</h2>
-            <img src="" id="captchaImage" alt="Captcha">
-            <input type="text" id="captchaInput" placeholder="Enter Captcha">
-            <button onclick="solveCaptcha()">Submit</button>
-        </div>
-        <div id="balanceContainer" style="display: none;">
-            <h2>Your Balance</h2>
-            <p id="balanceDisplay">₹0</p>
-            <button onclick="showWithdrawal()">Withdraw</button>
-            <div id="withdrawHistory">
-                <h3>Withdrawal History</h3>
-                <ul id="withdrawList"></ul>
+
+        <div id="dashboard" style="display: none;">
+            <h3>Dashboard</h3>
+            <div class="dashboard">
+                <p>Balance: <span id="balance">0</span> ₹</p>
+                <p>Captchas Entered: <span id="captchaCount">0</span></p>
+                <button onclick="enterCaptcha()">Enter Captcha</button>
             </div>
+            <div class="captcha" style="display: none;">
+                <h4>Enter Captcha</h4>
+                <img id="captchaImage" src="" alt="Captcha">
+                <input type="text" id="captchaInput" placeholder="Enter Captcha">
+                <button onclick="validateCaptcha()">Submit</button>
+            </div>
+            <button onclick="withdraw()">Withdraw</button>
+            <button onclick="logout()">Logout</button>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginSection = document.getElementById('loginSection');
-            const registerSection = document.getElementById('registerSection');
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            const captchaContainer = document.getElementById('captchaContainer');
-            const balanceContainer = document.getElementById('balanceContainer');
-            const balanceDisplay = document.getElementById('balanceDisplay');
-            const registeredEmail = document.getElementById('registeredEmail');
-            const withdrawList = document.getElementById('withdrawList');
-            let currentUser = null;
+        // Simulated user data stored in local storage
+        if (!localStorage.getItem('users')) {
+            localStorage.setItem('users', JSON.stringify([]));
+        }
 
-            // Check if user is already logged in
-            const loggedInUser = localStorage.getItem('loggedInUser');
-            if (loggedInUser) {
-                currentUser = JSON.parse(loggedInUser);
-                showBalanceSection(currentUser);
+        let currentUser = null;
+
+        function showRegister() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('registerPage').style.display = 'block';
+        }
+
+        function showLogin() {
+            document.getElementById('registerPage').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
+        }
+
+        function register() {
+            let newUsername = document.getElementById('newUsername').value.trim();
+            let newPassword = document.getElementById('newPassword').value.trim();
+
+            if (!newUsername || !newPassword) {
+                alert('Please enter both username and password.');
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('users'));
+            let userExists = users.find(user => user.username === newUsername);
+
+            if (userExists) {
+                alert('Username already exists. Please choose another.');
+                return;
+            }
+
+            users.push({ username: newUsername, password: newPassword, balance: 0, captchaCount: 0 });
+            localStorage.setItem('users', JSON.stringify(users));
+            showLogin();
+            alert('Registration successful. Please login.');
+        }
+
+        function login() {
+            let username = document.getElementById('username').value.trim();
+            let password = document.getElementById('password').value.trim();
+
+            let users = JSON.parse(localStorage.getItem('users'));
+            let user = users.find(user => user.username === username && user.password === password);
+
+            if (!user) {
+                alert('Invalid username or password.');
+                return;
+            }
+
+            currentUser = user;
+            updateDashboard();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
+        }
+
+        function updateDashboard() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('balance').innerText = currentUser.balance;
+            document.getElementById('captchaCount').innerText = currentUser.captchaCount;
+        }
+
+        function enterCaptcha() {
+            document.querySelector('.captcha').style.display = 'block';
+            let randomCaptcha = generateRandomCaptcha();
+            document.getElementById('captchaImage').src = randomCaptcha.image;
+            localStorage.setItem('captcha', randomCaptcha.text); // Save captcha locally for validation
+        }
+
+        function validateCaptcha() {
+            let captchaInput = document.getElementById('captchaInput').value.trim();
+            let savedCaptcha = localStorage.getItem('captcha');
+
+            if (captchaInput === savedCaptcha) {
+                currentUser.balance += 1;
+                currentUser.captchaCount += 1;
+                let users = JSON.parse(localStorage.getItem('users'));
+                let index = users.findIndex(user => user.username === currentUser.username);
+                users[index] = currentUser;
+                localStorage.setItem('users', JSON.stringify(users));
+                updateDashboard();
+                document.querySelector('.captcha').style.display = 'none';
+                alert('Captcha entered successfully.');
             } else {
-                showLoginSection();
+                alert('Incorrect captcha. Please try again.');
             }
+        }
 
-            // Function to show login section
-            function showLoginSection() {
-                loginSection.style.display = 'block';
-                registerSection.style.display = 'none';
-                captchaContainer.style.display = 'none';
-                balanceContainer.style.display = 'none';
+        function withdraw() {
+            if (currentUser.balance >= 500) {
+                // Here you can implement UPI payment logic or simulate withdrawal
+                currentUser.balance -= 500;
+                let users = JSON.parse(localStorage.getItem('users'));
+                let index = users.findIndex(user => user.username === currentUser.username);
+                users[index] = currentUser;
+                localStorage.setItem('users', JSON.stringify(users));
+                updateDashboard();
+                alert('Withdrawal request successful.');
+            } else {
+                alert('Minimum withdrawal amount is 500₹.');
             }
+        }
 
-            // Function to show register section
-            function showRegisterSection() {
-                loginSection.style.display = 'none';
-                registerSection.style.display = 'block';
-                captchaContainer.style.display = 'none';
-                balanceContainer.style.display = 'none';
+        function generateRandomCaptcha() {
+            let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let length = 6;
+            let captchaText = '';
+            for (let i = 0; i < length; i++) {
+                captchaText += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-
-            // Switch between login and register forms
-            document.getElementById('showRegister').addEventListener('click', function(event) {
-                event.preventDefault();
-                showRegisterSection();
-            });
-
-            document.getElementById('showLogin').addEventListener('click', function(event) {
-                event.preventDefault();
-                showLoginSection();
-            });
-
-            // Register Form Submission
-            registerForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-                const username = document.getElementById('registerUsername').value;
-                const password = document.getElementById('registerPassword').value;
-
-                // Check if username already exists
-                if (localStorage.getItem(username)) {
-                    alert('Username already exists. Please choose another one.');
-                } else {
-                    // Store user in local storage
-                    localStorage.setItem(username, JSON.stringify({ password: password, balance: 0, upi: '', email: `${username}@example.com`, withdrawHistory: [] }));
-                    alert('Registration successful. Please login.');
-                    showLoginSection();
-                }
-            });
-
-            // Login Form Submission
-            loginForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-                const username = document.getElementById('loginUsername').value;
-                const password = document.getElementById('loginPassword').value;
-
-                // Check if user exists in local storage
-                const userData = JSON.parse(localStorage.getItem(username));
-                if (userData && userData.password === password) {
-                    currentUser = { username: username };
-                    localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
-                    showCaptchaSection();
-                } else {
-                    alert('Invalid username or password.');
-                }
-            });
-
-            // Function to show captcha section
-            function showCaptchaSection() {
-                const userData = JSON.parse(localStorage.getItem(currentUser.username));
-                registeredEmail.textContent = `Registered Email: ${userData.email}`;
-                loginSection.style.display = 'none';
-                registerSection.style.display = 'none';
-                captchaContainer.style.display = 'block';
-                balanceContainer.style.display = 'none';
-                generateCaptcha();
-            }
-
-            // Function to generate random captcha (simulation)
-            function generateCaptcha() {
-                const captchaImage = document.getElementById('captchaImage');
-                const captchaInput = document.getElementById('captchaInput');
-                const randomCaptcha = Math.random().toString(36).slice(2, 8);
-                captchaImage.src = `https://dummyimage.com/150x50/000/fff&text=${randomCaptcha}`;
-                captchaInput.value = '';
-            }
-
-            // Function to solve captcha
-            window.solveCaptcha = function() {
-                const captchaInput = document.getElementById('captchaInput').value;
-                if (captchaInput.trim() !== '') {
-                    // Simulate captcha solving (replace with actual logic)
-                    const captchaPassed = Math.random() < 0.5; // Simulate 50% success rate
-                    if (captchaPassed) {
-                        const userData = JSON.parse(localStorage.getItem(currentUser.username));
-                        alert('Captcha solved successfully!');
-                        showBalanceSection(userData);
-                    } else {
-                        alert('Captcha failed. Please try again.');
-                        generateCaptcha();
-                    }
-                } else {
-                    alert('Please enter captcha.');
-                }
-            }
-
-            // Function to show balance section
-            function showBalanceSection(user) {
-                const userData = JSON.parse(localStorage.getItem(user.username));
-                balanceDisplay.textContent = `₹${userData.balance}`;
-                loginSection.style.display = 'none';
-                registerSection.style.display = 'none';
-                captchaContainer.style.display = 'none';
-                balanceContainer.style.display = 'block';
-                updateWithdrawHistory(user);
-            }
-
-            // Function to update withdraw history
-            function updateWithdrawHistory(user) {
-                const userData = JSON.parse(localStorage.getItem(user.username));
-                withdrawList.innerHTML = '';
-                userData.withdrawHistory.forEach(item => {
-                    const li = document.createElement('li');
-                    li.textContent = `Withdrawn ₹${item.amount} to UPI: ${item.upi}`;
-                    withdrawList.appendChild(li);
-                });
-            }
-
-            // Function to show withdrawal section
-            function showWithdrawal() {
-                loginSection.style.display = 'none';
-                registerSection.style.display = 'none';
-                captchaContainer.style.display = 'none';
-                balanceContainer.style.display = 'block';
-                updateWithdrawHistory(currentUser);
-            }
-
-            // Function to withdraw amount
-            window.withdraw = function() {
-                const upiInput = document.getElementById('upiInput').value;
-                const withdrawAmount = parseInt(document.getElementById('withdrawAmount').value);
-                const userData = JSON.parse(localStorage.getItem(currentUser.username));
-                                   if (upiInput.trim() !== '' && withdrawAmount >= 500 && withdrawAmount <= userData.balance) {
-                        userData.balance -= withdrawAmount;
-                        userData.withdrawHistory.push({ amount: withdrawAmount, upi: upiInput });
-                        localStorage.setItem(currentUser.username, JSON.stringify(userData));
-                        alert(`Withdrawal request of ₹${withdrawAmount} sent to UPI: ${upiInput}`);
-                        balanceDisplay.textContent = `₹${userData.balance}`;
-                        updateWithdrawHistory(currentUser);
-                    } else {
-                        alert('Invalid withdrawal request. Check amount or UPI ID.');
-                    }
-                }
-
-                // Function to confirm withdrawal
-                window.confirmWithdraw = function() {
-                    const withdrawAmount = parseInt(document.getElementById('withdrawAmount').value);
-                    const userData = JSON.parse(localStorage.getItem(currentUser.username));
-                    if (withdrawAmount < 500) {
-                        alert('Minimum withdrawal amount is ₹500.');
-                    } else {
-                        // Display confirmation dialog (would be replaced with actual UPI transaction logic)
-                        const confirmWithdrawal = confirm(`Confirm withdrawal of ₹${withdrawAmount} to your UPI?`);
-                        if (confirmWithdrawal) {
-                            withdraw();
-                        }
-                    }
-                }
-            });
-        </script>
-    </body>
-    </html>
+            let captchaImage = `https://dummyimage.com/200x75/000/fff&text=${captchaText}`;
+            return { text: captchaText, image: captchaImage };
+        }
+    </script>
+</body>
+</html>
