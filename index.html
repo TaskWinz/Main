@@ -104,6 +104,10 @@
             background-color: #444;
             color: #fff;
         }
+        .status {
+            margin-top: 20px;
+            color: #28a745;
+        }
     </style>
 </head>
 <body>
@@ -112,6 +116,7 @@
         <div class="register-container" id="register-form">
             <h2>Register</h2>
             <div class="form-container">
+                <input type="text" id="register-name" placeholder="Name" required>
                 <input type="email" id="register-email" placeholder="Email" required>
                 <input type="password" id="register-password" placeholder="Password" required>
                 <button onclick="register()">Register</button>
@@ -130,7 +135,7 @@
 
         <!-- Dashboard -->
         <div class="dashboard-container" id="dashboard" style="display: none;">
-            <h2>Welcome, <span id="user-email"></span>!</h2>
+            <h2>Welcome, <span id="user-name"></span>!</h2>
             <div class="balance">
                 Balance: <span id="balance-amount">0 ₹</span> (~<span id="balance-usd">0</span>$)
             </div>
@@ -141,6 +146,7 @@
                 <div class="captcha-image" id="captcha-image" onclick="generateCaptcha()"> </div> <!-- CAPTCHA image will be generated here -->
                 <input type="text" id="captcha-input" class="captcha-input" placeholder="Enter CAPTCHA" required>
                 <button onclick="submitCaptcha()">Submit</button>
+                <div class="status" id="status-message"></div>
             </div>
 
             <!-- Withdraw Section -->
@@ -148,7 +154,7 @@
                 <h3>Withdraw</h3>
                 <div class="form-container">
                     <input type="text" id="upi" placeholder="UPI ID" required>
-                    <input type="number" id="withdraw-amount" placeholder="Amount (₹)" required>
+                    <input type="number" id="withdraw-amount" placeholder="Amount (₹)" min="500" required>
                     <button onclick="withdraw()">Withdraw</button>
                 </div>
             </div>
@@ -163,6 +169,7 @@
                             <th>Amount (₹)</th>
                             <th>UPI</th>
                             <th>Order ID</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id="history-body">
@@ -174,11 +181,12 @@
     </div>
 
     <script>
-        let users = []; // Simulated user database
-        let currentUser = null;
-        let balance = 0; // Simulated balance
+        let users = JSON.parse(localStorage.getItem('users')) || []; // Simulated user database with local storage
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+        let balance = parseFloat(localStorage.getItem('balance')) || 0; // Simulated balance with local storage
 
         function register() {
+            const name = document.getElementById('register-name').value;
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
 
@@ -190,8 +198,9 @@
             }
 
             // Register new user
-            const newUser = { email, password, balance: 0 };
+            const newUser = { name, email, password, balance: 0 };
             users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
             alert('Registration successful! Please log in.');
             document.getElementById('register-form').style.display = 'none';
             document.getElementById('login-form').style.display = 'block';
@@ -205,9 +214,10 @@
             currentUser = users.find(user => user.email === email && user.password === password);
             if (currentUser) {
                 alert('Login successful!');
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 document.getElementById('login-form').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
-                document.getElementById('user-email').innerText = currentUser.email;
+                document.getElementById('user-name').innerText = currentUser.name;
                 updateBalance();
                 loadHistory();
                 generateCaptcha();
@@ -229,13 +239,14 @@
                 if (captchaInput && captchaInput.toUpperCase() === captchaValue) {
                     balance += 1;
                     updateBalance();
-                    alert('CAPTCHA solved successfully! 1₹ credited to your balance.');
-                    generateCaptcha(); // Generate new CAPTCHA
+                    addToHistory(1, 'Success'); // Assuming 1 ₹ reward and 'Success' status
+                    localStorage.setItem('balance', balance.toString());
                     document.getElementById('captcha-input').value = ''; // Clear input field
+                    document.getElementById('status-message').innerText = 'CAPTCHA solved successfully!';
                 } else {
-                    alert('Invalid CAPTCHA. Please try again.');
-                    generateCaptcha(); // Generate new CAPTCHA
+                    document.getElementById('status-message').innerText = 'Invalid CAPTCHA. Please try again.';
                 }
+                generateCaptcha(); // Generate new CAPTCHA
             } else {
                 alert('Please log in first.');
             }
@@ -243,14 +254,15 @@
 
         function withdraw() {
             const upi = document.getElementById('upi').value;
-            const amount = parseFloat(document.getElementById('withdraw-amount').value);
-            if (amount > balance) {
-                alert('Insufficient balance!');
+                            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            if (amount < 500 || amount > balance) {
+                alert('Withdraw amount should be at least 500 ₹ and less than or equal to your balance.');
                 return;
             }
             balance -= amount;
             updateBalance();
-            addToHistory(amount, upi);
+            addToHistory(amount, upi, 'Pending'); // Assuming 'Pending' status initially
+            localStorage.setItem('balance', balance.toString());
         }
 
         function updateBalance() {
@@ -262,131 +274,32 @@
             const historyBody = document.getElementById('history-body');
             historyBody.innerHTML = ''; // Clear previous entries
 
-            // Simulated history data (remove example entries)
-            /*
-            const history = [
-                { date: '2023-01-01',
-                                <tbody id="history-body">
-                        <!-- History items will be added dynamically -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let users = []; // Simulated user database
-        let currentUser = null;
-        let balance = 0; // Simulated balance
-
-        function register() {
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
-
-            // Check if email is already registered
-            const existingUser = users.find(user => user.email === email);
-            if (existingUser) {
-                alert('Email already registered. Please log in.');
-                return;
-            }
-
-            // Register new user
-            const newUser = { email, password, balance: 0 };
-            users.push(newUser);
-            alert('Registration successful! Please log in.');
-            document.getElementById('register-form').style.display = 'none';
-            document.getElementById('login-form').style.display = 'block';
-        }
-
-        function login() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-
-            // Find user in database
-            currentUser = users.find(user => user.email === email && user.password === password);
-            if (currentUser) {
-                alert('Login successful!');
-                document.getElementById('login-form').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                document.getElementById('user-email').innerText = currentUser.email;
-                updateBalance();
-                loadHistory();
-                generateCaptcha();
-            } else {
-                alert('Invalid email or password. Please try again.');
+            if (currentUser && currentUser.history) {
+                currentUser.history.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.date}</td>
+                        <td>${item.amount.toFixed(2)} ₹</td>
+                        <td>${item.upi}</td>
+                        <td>${item.orderId}</td>
+                        <td>${item.status}</td>
+                    `;
+                    historyBody.appendChild(row);
+                });
             }
         }
 
-        function generateCaptcha() {
-            const captchaImage = document.getElementById('captcha-image');
-            const captchaValue = Math.random().toString(36).substr(2, 4).toUpperCase();
-            captchaImage.innerText = captchaValue;
-        }
-
-        function submitCaptcha() {
-            if (currentUser) {
-                const captchaInput = document.getElementById('captcha-input').value;
-                const captchaValue = document.getElementById('captcha-image').innerText;
-                if (captchaInput && captchaInput.toUpperCase() === captchaValue) {
-                    balance += 1;
-                    updateBalance();
-                    alert('CAPTCHA solved successfully! 1₹ credited to your balance.');
-                    generateCaptcha(); // Generate new CAPTCHA
-                    document.getElementById('captcha-input').value = ''; // Clear input field
-                } else {
-                    alert('Invalid CAPTCHA. Please try again.');
-                    generateCaptcha(); // Generate new CAPTCHA
-                }
-            } else {
-                alert('Please log in first.');
-            }
-        }
-
-        function withdraw() {
-            const upi = document.getElementById('upi').value;
-            const amount = parseFloat(document.getElementById('withdraw-amount').value);
-            if (amount > balance) {
-                alert('Insufficient balance!');
-                return;
-            }
-            balance -= amount;
-            updateBalance();
-            addToHistory(amount, upi);
-        }
-
-        function updateBalance() {
-            document.getElementById('balance-amount').innerText = `${balance.toFixed(2)} ₹`;
-            document.getElementById('balance-usd').innerText = `${(balance / 82).toFixed(2)}`; // Assuming 1 USD = 82 INR
-        }
-
-        function loadHistory() {
-            const historyBody = document.getElementById('history-body');
-            historyBody.innerHTML = ''; // Clear previous entries
-
-            // Simulated history data (remove example entries)
-            /*
-            const history = [
-                { date: '2023-01-01', amount: 20.00, upi: 'example@upi', orderId: generateOrderId() },
-                { date: '2023-01-15', amount: 15.00, upi: 'user@upi', orderId: generateOrderId() }
-            ];
-            */
-
-            // Add your actual history data handling here
-        }
-
-        function addToHistory(amount, upi) {
-            const historyBody = document.getElementById('history-body');
-
+        function addToHistory(amount, upi, status) {
             const date = new Date().toISOString().split('T')[0];
             const orderId = generateOrderId();
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${date}</td>
-                <td>${amount.toFixed(2)} ₹</td>
-                <td>${upi}</td>
-                <td>${orderId}</td>
-            `;
-            historyBody.appendChild(row);
+            const historyItem = { date, amount, upi, orderId, status };
+
+            if (!currentUser.history) {
+                currentUser.history = [];
+            }
+            currentUser.history.push(historyItem);
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            loadHistory(); // Reload history after adding new entry
         }
 
         function generateOrderId() {
