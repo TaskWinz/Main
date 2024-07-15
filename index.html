@@ -215,7 +215,7 @@
             users[index] = currentUser;
             localStorage.setItem('users', JSON.stringify(users));
 
-            // Logging withdrawal
+                        // Logging withdrawal
             let withdrawals = JSON.parse(localStorage.getItem('withdrawals'));
             let withdrawal = { username: currentUser.username, upiId: upiId, amount: withdrawAmount, timestamp: new Date().toLocaleString(), status: 'success' };
             withdrawals.push(withdrawal);
@@ -242,7 +242,8 @@
             let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let length = 6;
             let captchaText = '';
-                            captchaText += chars.charAt(Math.floor(Math.random() * chars.length));
+            for (let i = 0; i < length; i++) {
+                captchaText += chars.charAt(Math.floor(Math.random() * chars.length));
             }
             let captchaImage = `https://dummyimage.com/200x75/000/fff&text=${captchaText}`;
             return { text: captchaText, image: captchaImage };
