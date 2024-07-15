@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CAPTCHA Earning Website</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             background-color: #f0f2f5;
             display: flex;
             justify-content: center;
@@ -85,8 +86,18 @@
 </head>
 <body>
     <div class="container">
+        <!-- Register Form -->
+        <div class="register-container" id="register-form">
+            <h2>Register</h2>
+            <div class="form-container">
+                <input type="email" id="register-email" placeholder="Email" required>
+                <input type="password" id="register-password" placeholder="Password" required>
+                <button onclick="register()">Register</button>
+            </div>
+        </div>
+
         <!-- Login Form -->
-        <div class="login-container" id="login-form">
+        <div class="login-container" id="login-form" style="display: none;">
             <h2>Login</h2>
             <div class="form-container">
                 <input type="email" id="login-email" placeholder="Email" required>
@@ -99,7 +110,7 @@
         <div class="dashboard-container" id="dashboard" style="display: none;">
             <h2>Welcome, <span id="user-email"></span>!</h2>
             <div class="balance">
-                Balance: <span id="balance-amount">0 ₹</span>
+                Balance: <span id="balance-amount">0 ₹</span> (~<span id="balance-usd">0</span>$)
             </div>
             <button onclick="showCaptcha()">Solve CAPTCHA</button>
 
@@ -146,6 +157,21 @@
     <script>
         let balance = 0; // Simulated balance
         let currentUser = null;
+
+        // Function to simulate registration
+        function register() {
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            
+            // Simulated registration logic
+            if (email && password) {
+                alert('Registration successful! You can now log in.');
+                document.getElementById('register-form').style.display = 'none';
+                document.getElementById('login-form').style.display = 'block';
+            } else {
+                alert('Please enter valid details.');
+            }
+        }
 
         // Function to simulate login
         function login() {
@@ -202,6 +228,8 @@
         function updateBalance() {
             const balanceDisplay = document.getElementById('balance-amount');
             balanceDisplay.innerText = `${balance.toFixed(2)} ₹`;
+            const balanceUSD = (balance / 82).toFixed(2); // Assuming 1 USD = 82 INR
+            document.getElementById('balance-usd').innerText = balanceUSD;
         }
 
         // Function to simulate loading withdraw history
@@ -216,38 +244,31 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${item.date}</td>
-                    <td>${item.amount.toFixed(2)} ₹</td>
-                    <td>${item.upi}</td>
+                                       <td>${item.upi}</td>
                     <td>${item.orderId}</td>
                 `;
                 historyBody.appendChild(row);
             });
         }
 
-        // Function to simulate adding to withdraw history
+        // Function to add an entry to the history
         function addToHistory(amount, upi) {
             const historyBody = document.getElementById('history-body');
-            const currentDate = new Date().toISOString().split('T')[0];
-            const orderId = generateOrderId(); // Generate random order ID
+            const date = new Date().toISOString().split('T')[0];
+            const orderId = generateOrderId();
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${currentDate}</td>
+                <td>${date}</td>
                 <td>${amount.toFixed(2)} ₹</td>
                 <td>${upi}</td>
                 <td>${orderId}</td>
             `;
-            historyBody.insertBefore(row, historyBody.firstChild); // Add new entry at the beginning
+            historyBody.appendChild(row);
         }
 
-        // Function to generate random order ID
+        // Function to generate a random order ID
         function generateOrderId() {
-            const orderIdLength = 12;
-            const characters = '0123456789';
-            let orderId = '';
-            for (let i = 0; i < orderIdLength; i++) {
-                orderId += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return orderId;
+            return 'ORDER-' + Math.random().toString(36).substr(2, 9).toUpperCase();
         }
     </script>
 </body>
