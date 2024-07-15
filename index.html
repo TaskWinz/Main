@@ -129,6 +129,7 @@
             <div class="captcha-container">
                 <h3>Solve CAPTCHA</h3>
                 <div class="captcha-image" id="captcha-image" onclick="submitCaptcha()"> </div> <!-- CAPTCHA image will be generated here -->
+                <input type="text" id="captcha-input" placeholder="Enter CAPTCHA" style="margin-top: 10px;" required>
             </div>
 
             <!-- Withdraw Section -->
@@ -212,7 +213,7 @@
 
         function submitCaptcha() {
             if (currentUser) {
-                const captchaInput = prompt('Enter the CAPTCHA:', '');
+                const captchaInput = document.getElementById('captcha-input').value;
                 const captchaValue = document.getElementById('captcha-image').innerText;
                 if (captchaInput && captchaInput.toUpperCase() === captchaValue) {
                     balance += 1;
@@ -262,8 +263,9 @@
 
         function addToHistory(amount, upi) {
             const historyBody = document.getElementById('history-body');
+
             const date = new Date().toISOString().split('T')[0];
-                        const orderId = generateOrderId();
+            const orderId = generateOrderId();
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${date}</td>
