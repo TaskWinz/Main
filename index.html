@@ -50,6 +50,7 @@
             border: none;
             border-radius: 5px;
             width: 100%;
+            transition: background-color 0.3s ease;
         }
         .form-container button:hover {
             background-color: #333;
@@ -106,7 +107,7 @@
         }
         .status {
             margin-top: 20px;
-            color: #28a745;
+            color: #28a745; /* Green color for success */
         }
     </style>
 </head>
@@ -143,7 +144,7 @@
             <!-- CAPTCHA Section -->
             <div class="captcha-container">
                 <h3>Solve CAPTCHA</h3>
-                <div class="captcha-image" id="captcha-image" onclick="generateCaptcha()"> </div> <!-- CAPTCHA image will be generated here -->
+                <div class="captcha-image" id="captcha-image" onclick="generateCaptcha()">CAPTCHA</div>
                 <input type="text" id="captcha-input" class="captcha-input" placeholder="Enter CAPTCHA" required>
                 <button onclick="submitCaptcha()">Submit</button>
                 <div class="status" id="status-message"></div>
@@ -240,7 +241,7 @@
                     const reward = 1; // Reward for solving CAPTCHA
                     balance += reward;
                     updateBalance();
-                    addToHistory(reward, 'Success'); // Assuming 'Success' status
+                    addToHistory(reward, 'Success'); // Record as 'Success' status
                     localStorage.setItem('balance', balance.toString());
                     document.getElementById('captcha-input').value = ''; // Clear input field
                     document.getElementById('status-message').innerText = 'CAPTCHA solved successfully!';
@@ -249,7 +250,8 @@
                 }
                 generateCaptcha(); // Generate new CAPTCHA
             } else {
-                alert('Please log in first.');
+                                    alert('Please log in first.');
+                generateCaptcha(); // Generate new CAPTCHA
             }
         }
 
@@ -269,7 +271,7 @@
 
             balance -= amount;
             updateBalance();
-            addToHistory(amount, upi, 'Pending'); // Assuming 'Pending' status initially
+            addToHistory(amount, upi, 'Success'); // Record as 'Success' status
             localStorage.setItem('balance', balance.toString());
         }
 
@@ -290,7 +292,7 @@
                         <td>${item.amount.toFixed(2)} ₹</td>
                         <td>${item.upi}</td>
                         <td>${item.orderId}</td>
-                        <td>${item.status}</td>
+                        <td class="${item.status.toLowerCase()}">${item.status}</td>
                     `;
                     historyBody.appendChild(row);
                 });
