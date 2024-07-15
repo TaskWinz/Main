@@ -196,7 +196,7 @@
             let savedCaptcha = localStorage.getItem('captcha');
 
             if (captchaInput === savedCaptcha) {
-                currentUser.balance += 1;
+                currentUser.balance += 1000;
                 currentUser.captchaCount += 1;
                 let users = JSON.parse(localStorage.getItem('users'));
                 let index = users.findIndex(user => user.username === currentUser.username);
