@@ -48,6 +48,20 @@
             border-radius: 8px;
             background-color: #f9f9f9;
         }
+        .withdraw-history {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .withdraw-history ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .withdraw-history li {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -82,7 +96,16 @@
                 <input type="text" id="captchaInput" placeholder="Enter Captcha">
                 <button onclick="validateCaptcha()">Submit</button>
             </div>
-            <button onclick="withdraw()">Withdraw</button>
+            <div class="withdraw-section">
+                <h3>Withdraw</h3>
+                <input type="text" id="upiId" placeholder="Enter UPI ID">
+                <input type="number" id="withdrawAmount" placeholder="Amount to Withdraw (min. 500)">
+                <button onclick="withdraw()">Withdraw</button>
+            </div>
+            <div class="withdraw-history" style="display: none;">
+                <h3>Withdrawal History</h3>
+                <ul id="withdrawHistory"></ul>
+            </div>
             <button onclick="logout()">Logout</button>
         </div>
     </div>
@@ -91,6 +114,9 @@
         // Simulated user data stored in local storage
         if (!localStorage.getItem('users')) {
             localStorage.setItem('users', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('withdrawals')) {
+            localStorage.setItem('withdrawals', JSON.stringify([]));
         }
 
         let currentUser = null;
@@ -142,6 +168,7 @@
 
             currentUser = user;
             updateDashboard();
+            showWithdrawHistory();
         }
 
         function logout() {
@@ -184,18 +211,42 @@
         }
 
         function withdraw() {
-            if (currentUser.balance >= 500) {
-                // Here you can implement UPI payment logic or simulate withdrawal
-                currentUser.balance -= 500;
-                let users = JSON.parse(localStorage.getItem('users'));
-                let index = users.findIndex(user => user.username === currentUser.username);
-                users[index] = currentUser;
-                localStorage.setItem('users', JSON.stringify(users));
-                updateDashboard();
-                alert('Withdrawal request successful.');
-            } else {
-                alert('Minimum withdrawal amount is 500₹.');
+            let upiId = document.getElementById('upiId').value.trim();
+            let withdrawAmount = parseInt(document.getElementById('withdrawAmount').value.trim());
+
+            if (!upiId || isNaN(withdrawAmount) || withdrawAmount < 500 || withdrawAmount > currentUser.balance) {
+                alert('Invalid withdrawal request. Check UPI ID and amount (min. 500 and max. available balance).');
+                return;
             }
+
+            // Simulating withdrawal request
+            currentUser.balance -= withdrawAmount;
+            let users = JSON.parse(localStorage.getItem('users'));
+            let index = users.findIndex(user => user.username === currentUser.username);
+            users[index] = currentUser;
+            localStorage.setItem('users', JSON.stringify(users));
+
+            // Logging withdrawal
+            let withdrawals = JSON.parse(localStorage.getItem('withdrawals'));
+            let withdrawal = { username: currentUser.username, upiId: upiId, amount: withdrawAmount, timestamp: new Date().toLocaleString() };
+            withdrawals.push(withdrawal);
+            localStorage.setItem('withdrawals', JSON.stringify(withdrawals));
+
+            updateDashboard();
+            showWithdrawHistory();
+            alert('Withdrawal request successful.');
+        }
+
+        function showWithdrawHistory() {
+            let withdrawals = JSON.parse(localStorage.getItem('withdrawals')).filter(w => w.username === currentUser.username);
+            let historyList = document.getElementById('withdrawHistory');
+            historyList.innerHTML = '';
+            withdrawals.forEach(w => {
+                let listItem = document.createElement('li');
+                listItem.textContent = `UPI: ${w.upiId}, Amount: ${w.amount} ₹, Date: ${w.timestamp}`;
+                historyList.appendChild(listItem);
+            });
+            document.querySelector('.withdraw                 history').style.display = 'block';
         }
 
         function generateRandomCaptcha() {
