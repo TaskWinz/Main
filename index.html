@@ -40,13 +40,22 @@
         h1, h2 {
             color: #333;
         }
-        #captchaContainer, #balanceContainer {
+        #captchaContainer, #balanceContainer, #withdrawHistory {
             display: none;
             margin-top: 20px;
-        }
-        #withdrawHistory {
             text-align: left;
-            margin-top: 20px;
+        }
+        #withdrawHistory ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        #registeredEmail {
+            font-size: 14px;
+            color: #666;
+        }
+        #balanceDisplay {
+            font-size: 24px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -79,11 +88,9 @@
             <button onclick="solveCaptcha()">Submit</button>
         </div>
         <div id="balanceContainer" style="display: none;">
-            <h2>Your Balance: ₹<span id="balance">0</span></h2>
-            <button onclick="withdraw()">Withdraw</button>
-            <input type="text" id="upiInput" placeholder="Enter UPI ID">
-            <input type="number" id="withdrawAmount" placeholder="Enter Amount (min ₹500)">
-            <button onclick="confirmWithdraw()">Confirm Withdrawal</button>
+            <h2>Your Balance</h2>
+            <p id="balanceDisplay">₹0</p>
+            <button onclick="showWithdrawal()">Withdraw</button>
             <div id="withdrawHistory">
                 <h3>Withdrawal History</h3>
                 <ul id="withdrawList"></ul>
@@ -99,7 +106,7 @@
             const registerForm = document.getElementById('registerForm');
             const captchaContainer = document.getElementById('captchaContainer');
             const balanceContainer = document.getElementById('balanceContainer');
-            const balanceDisplay = document.getElementById('balance');
+            const balanceDisplay = document.getElementById('balanceDisplay');
             const registeredEmail = document.getElementById('registeredEmail');
             const withdrawList = document.getElementById('withdrawList');
             let currentUser = null;
@@ -151,7 +158,7 @@
                     alert('Username already exists. Please choose another one.');
                 } else {
                     // Store user in local storage
-                    localStorage.setItem(username, JSON.stringify({ password: password, balance: 0, upi: '', email: username + '@example.com', withdrawHistory: [] }));
+                    localStorage.setItem(username, JSON.stringify({ password: password, balance: 0, upi: '', email: `${username}@example.com`, withdrawHistory: [] }));
                     alert('Registration successful. Please login.');
                     showLoginSection();
                 }
@@ -216,7 +223,7 @@
             // Function to show balance section
             function showBalanceSection(user) {
                 const userData = JSON.parse(localStorage.getItem(user.username));
-                balanceDisplay.textContent = userData.balance;
+                balanceDisplay.textContent = `₹${userData.balance}`;
                 loginSection.style.display = 'none';
                 registerSection.style.display = 'none';
                 captchaContainer.style.display = 'none';
@@ -235,38 +242,47 @@
                 });
             }
 
+            // Function to show withdrawal section
+            function showWithdrawal() {
+                loginSection.style.display = 'none';
+                registerSection.style.display = 'none';
+                captchaContainer.style.display = 'none';
+                balanceContainer.style.display = 'block';
+                updateWithdrawHistory(currentUser);
+            }
+
             // Function to withdraw amount
             window.withdraw = function() {
                 const upiInput = document.getElementById('upiInput').value;
                 const withdrawAmount = parseInt(document.getElementById('withdrawAmount').value);
                 const userData = JSON.parse(localStorage.getItem(currentUser.username));
-                if (upiInput.trim() !== '' && withdrawAmount >= 500 && withdrawAmount <= userData.balance) {
-                    userData.balance -= withdrawAmount;
-                    userData.withdrawHistory.push({ amount: withdrawAmount, upi: upiInput });
-                    localStorage.setItem(currentUser.username, JSON.stringify(userData));
-                                         alert(`Withdrawal request of ₹${withdrawAmount} sent to UPI: ${upiInput}`);
-                    balanceDisplay.textContent = userData.balance;
-                    updateWithdrawHistory(currentUser);
-                } else {
-                    alert('Invalid withdrawal request. Check amount or UPI ID.');
-                }
-            }
-
-            // Function to confirm withdrawal
-            window.confirmWithdraw = function() {
-                const withdrawAmount = parseInt(document.getElementById('withdrawAmount').value);
-                const userData = JSON.parse(localStorage.getItem(currentUser.username));
-                if (withdrawAmount < 500) {
-                    alert('Minimum withdrawal amount is ₹500.');
-                } else {
-                    // Display confirmation dialog (would be replaced with actual UPI transaction logic)
-                    const confirmWithdrawal = confirm(`Confirm withdrawal of ₹${withdrawAmount} to your UPI?`);
-                    if (confirmWithdrawal) {
-                        withdraw();
+                                   if (upiInput.trim() !== '' && withdrawAmount >= 500 && withdrawAmount <= userData.balance) {
+                        userData.balance -= withdrawAmount;
+                        userData.withdrawHistory.push({ amount: withdrawAmount, upi: upiInput });
+                        localStorage.setItem(currentUser.username, JSON.stringify(userData));
+                        alert(`Withdrawal request of ₹${withdrawAmount} sent to UPI: ${upiInput}`);
+                        balanceDisplay.textContent = `₹${userData.balance}`;
+                        updateWithdrawHistory(currentUser);
+                    } else {
+                        alert('Invalid withdrawal request. Check amount or UPI ID.');
                     }
                 }
-            }
-        });
-    </script>
-</body>
-</html>                                                   
+
+                // Function to confirm withdrawal
+                window.confirmWithdraw = function() {
+                    const withdrawAmount = parseInt(document.getElementById('withdrawAmount').value);
+                    const userData = JSON.parse(localStorage.getItem(currentUser.username));
+                    if (withdrawAmount < 500) {
+                        alert('Minimum withdrawal amount is ₹500.');
+                    } else {
+                        // Display confirmation dialog (would be replaced with actual UPI transaction logic)
+                        const confirmWithdrawal = confirm(`Confirm withdrawal of ₹${withdrawAmount} to your UPI?`);
+                        if (confirmWithdrawal) {
+                            withdraw();
+                        }
+                    }
+                }
+            });
+        </script>
+    </body>
+    </html>
