@@ -262,8 +262,8 @@
 
         function addToHistory(amount, upi) {
             const historyBody = document.getElementById('history-body');
-            const date = new Date().toISOString().split('T')[
-                            const orderId = generateOrderId();
+            const date = new Date().toISOString().split('T')[0];
+                        const orderId = generateOrderId();
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${date}</td>
