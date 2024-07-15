@@ -5,55 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Captcha Earning Website</title>
     <style>
-        /* Basic styling for demo purposes */
+        /* Dark theme styling */
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background-color: #1e1e1e;
+            color: #ffffff;
             padding: 20px;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background-color: #fff;
+            background-color: #333333;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        input[type="text"], input[type="password"], button {
+        input[type="text"], input[type="password"], input[type="number"], button {
             width: 100%;
             padding: 10px;
             margin: 5px 0;
             box-sizing: border-box;
+            background-color: #444444;
+            border: 1px solid #555555;
+            color: #ffffff;
         }
         button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
+            background-color: #007bff;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
         }
-        .dashboard {
+        .dashboard, .captcha, .withdraw-section, .withdraw-history {
             margin-top: 20px;
             padding: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid #555555;
             border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-        .captcha {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-        .withdraw-history {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: #f9f9f9;
+            background-color: #444444;
         }
         .withdraw-history ul {
             list-style-type: none;
@@ -66,13 +55,13 @@
 </head>
 <body>
     <div class="container">
-        <h2>Captcha Earning Website</h2>
+        <h2 style="text-align: center;">Captcha Earning Website</h2>
         <div id="loginPage">
             <h3>Login</h3>
             <input type="text" id="username" placeholder="Username">
             <input type="password" id="password" placeholder="Password">
             <button onclick="login()">Login</button>
-            <p>Don't have an account? <a href="#" onclick="showRegister()">Register here</a></p>
+            <p style="text-align: center;">Don't have an account? <a href="#" onclick="showRegister()">Register here</a></p>
         </div>
 
         <div id="registerPage" style="display: none;">
@@ -80,7 +69,7 @@
             <input type="text" id="newUsername" placeholder="New Username">
             <input type="password" id="newPassword" placeholder="New Password">
             <button onclick="register()">Register</button>
-            <p>Already have an account? <a href="#" onclick="showLogin()">Login here</a></p>
+            <p style="text-align: center;">Already have an account? <a href="#" onclick="showLogin()">Login here</a></p>
         </div>
 
         <div id="dashboard" style="display: none;">
@@ -106,7 +95,7 @@
                 <h3>Withdrawal History</h3>
                 <ul id="withdrawHistory"></ul>
             </div>
-            <button onclick="logout()">Logout</button>
+            <button onclick="logout()" style="margin-top: 10px;">Logout</button>
         </div>
     </div>
 
@@ -196,7 +185,7 @@
             let savedCaptcha = localStorage.getItem('captcha');
 
             if (captchaInput === savedCaptcha) {
-                currentUser.balance += 1000;
+                currentUser.balance += 1;
                 currentUser.captchaCount += 1;
                 let users = JSON.parse(localStorage.getItem('users'));
                 let index = users.findIndex(user => user.username === currentUser.username);
@@ -228,7 +217,7 @@
 
             // Logging withdrawal
             let withdrawals = JSON.parse(localStorage.getItem('withdrawals'));
-            let withdrawal = { username: currentUser.username, upiId: upiId, amount: withdrawAmount, timestamp: new Date().toLocaleString() };
+            let withdrawal = { username: currentUser.username, upiId: upiId, amount: withdrawAmount, timestamp: new Date().toLocaleString(), status: 'success' };
             withdrawals.push(withdrawal);
             localStorage.setItem('withdrawals', JSON.stringify(withdrawals));
 
@@ -243,18 +232,17 @@
             historyList.innerHTML = '';
             withdrawals.forEach(w => {
                 let listItem = document.createElement('li');
-                listItem.textContent = `UPI: ${w.upiId}, Amount: ${w.amount} ₹, Date: ${w.timestamp}`;
+                listItem.textContent = `UPI: ${w.upiId}, Amount: ${w.amount} ₹, Date: ${w.timestamp}, Status: ${w.status}`;
                 historyList.appendChild(listItem);
             });
-            document.querySelector('.withdraw                 history').style.display = 'block';
+            document.querySelector('.withdraw-history').style.display = 'block';
         }
 
         function generateRandomCaptcha() {
             let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let length = 6;
             let captchaText = '';
-            for (let i = 0; i < length; i++) {
-                captchaText += chars.charAt(Math.floor(Math.random() * chars.length));
+                            captchaText += chars.charAt(Math.floor(Math.random() * chars.length));
             }
             let captchaImage = `https://dummyimage.com/200x75/000/fff&text=${captchaText}`;
             return { text: captchaText, image: captchaImage };
