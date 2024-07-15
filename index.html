@@ -145,6 +145,21 @@
         .withdraw-container button:hover {
             background-color: #555;
         }
+        .logout {
+            margin-top: 20px;
+        }
+        .logout button {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .logout button:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -173,6 +188,9 @@
         <!-- Dashboard -->
         <div class="dashboard-container" id="dashboard" style="display: none;">
             <h2>Welcome, <span id="user-name"></span>!</h2>
+            <div class="logout">
+                <button onclick="logout()">Logout</button>
+            </div>
             <div class="balance">
                 Balance: <span id="balance-amount">0 ₹</span> (~<span id="balance-usd">0</span>$)
             </div>
@@ -221,6 +239,7 @@
         let users = JSON.parse(localStorage.getItem('users')) || []; // Simulated user database with local storage
         let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
         let balance = parseFloat(localStorage.getItem('balance')) || 0; // Simulated balance with local storage
+        let currentCaptcha = '';
 
         function register() {
             const name = document.getElementById('register-name').value;
@@ -242,24 +261,7 @@
             document.getElementById('register-form').style.display = 'none';
             document.getElementById('login-form').style.display = 'block';
         }
-
-        function login() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-
-            // Find user in database
-            currentUser = users.find(user => user.email === email && user.password === password);
-            if (currentUser) {
-                alert('Login successful!');
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                document.getElementById('login-form').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                document.getElementById('user-name').innerText = currentUser.name;
-                updateBalance();
-                loadHistory();
-                generateCaptcha();
-            } else {
-                alert('Invalid email or         function login() {
+                function login() {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
 
@@ -277,6 +279,12 @@
             } else {
                 alert('Invalid email or password. Please try again.');
             }
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            location.reload(); // Refresh the page to show login form
         }
 
         function submitCaptcha() {
