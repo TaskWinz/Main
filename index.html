@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAPTCHA Earning Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .login-container, .dashboard-container, .captcha-container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .form-container input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-container button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        .form-container button:hover {
+            background-color: #45a049;
+        }
+        .balance {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .history {
+            text-align: left;
+            margin-top: 20px;
+        }
+        .history table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .history table th, .history table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+        .captcha-image {
+            width: 100px;
+            height: 50px;
+            background-color: #ccc;
+            margin: 10px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div class="login-container" id="login-form">
+            <h2>Login</h2>
+            <input type="email" id="login-email" placeholder="Email" required>
+            <input type="password" id="login-password" placeholder="Password" required>
+            <button onclick="login()">Login</button>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard-container" id="dashboard">
+            <h2>Welcome, <span id="user-email"></span>!</h2>
+            <div class="balance">
+                Balance: <span id="balance-amount">0 ₹</span>
+            </div>
+            <button onclick="showCaptcha()">Solve CAPTCHA</button>
+
+            <!-- Withdraw Section -->
+            <div class="withdraw-container" id="withdraw-form">
+                <h3>Withdraw</h3>
+                <input type="text" id="upi" placeholder="UPI ID" required>
+                <input type="number" id="withdraw-amount" placeholder="Amount (₹)" required>
+                <button onclick="withdraw()">Withdraw</button>
+            </div>
+
+            <!-- Withdraw History -->
+            <div class="history" id="withdraw-history">
+                <h3>Withdraw History</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Amount (₹)</th>
+                            <th>UPI</th>
+                            <th>Order ID</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                        <!-- History items will be added dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CAPTCHA Form -->
+        <div class="captcha-container" id="captcha-form" style="display: none;">
+            <h3>Solve CAPTCHA</h3>
+            <div class="captcha-image" id="captcha-image">1234</div> <!-- Simulated CAPTCHA image -->
+            <input type="text" id="captcha-input" placeholder="Enter CAPTCHA" required>
+            <button onclick="submitCaptcha()">Submit</button>
+        </div>
+    </div>
+
+    <script>
+        let balance = 0; // Simulated balance
+        let currentUser = null;
+
+        // Function to simulate login
+        function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            // Simulated login logic (replace with actual authentication)
+            if (email === 'test@example.com' && password === 'password') {
+                currentUser = { email: email, balance: balance };
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('user-email').innerText = email;
+                updateBalance();
+                loadHistory(); // Simulated load history
+            } else {
+                alert('Invalid email or password. Please try again.');
+            }
+        }
+
+        // Function to show CAPTCHA form
+        function showCaptcha() {
+            document.getElementById('captcha-form').style.display = 'block';
+        }
+
+        // Function to simulate submitting CAPTCHA
+        function submitCaptcha() {
+            const captchaInput = document.getElementById('captcha-input').value;
+            if (captchaInput === '1234') { // Simulated CAPTCHA validation
+                balance += 1; // Earn 1₹ for solving CAPTCHA
+                updateBalance();
+                alert('CAPTCHA solved successfully! 1₹ credited to your balance.');
+                document.getElementById('captcha-form').style.display = 'none';
+                document.getElementById('captcha-input').value = '';
+            } else {
+                alert('Invalid CAPTCHA. Please try again.');
+            }
+        }
+
+        // Function to simulate withdrawing money
+        function withdraw() {
+            const upi = document.getElementById('upi').value;
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            if (amount > balance) {
+                alert('Insufficient balance!');
+                return;
+            }
+            // Simulated deduct balance
+            balance -= amount;
+            updateBalance();
+            addToHistory(amount, upi); // Simulated add to history
+        }
+
+        // Function to update balance display
+        function updateBalance() {
+            const balanceDisplay = document.getElementById('balance-amount');
+            balanceDisplay.innerText = `${balance.toFixed(2)} ₹`;
+        }
+
+        // Function to simulate loading withdraw history
+        function loadHistory() {
+            const historyBody = document.getElementById('history-body');
+            // Simulated history data
+            const history = [
+                { date: '2023-01-01', amount: 20.00, upi: 'example@upi', orderId: generateOrderId() },
+                { date: '2023-01-15', amount: 15.00, upi: 'user@upi', orderId: generateOrderId() }
+            ];
+            history.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.amount.toFixed(2)} ₹</td>
+                    <td>${item.upi}</td>
+                    <td>${item.orderId}</td>
+                `;
+                historyBody.appendChild(row);
+            });
+        }
+
+        // Function to simulate adding to withdraw history
+        function addToHistory(amount, upi) {
+            const historyBody = document.getElementById('history-body');
+            const currentDate = new Date().toISOString().split('T')[0];
+            const orderId = generateOrderId(); // Generate random order ID
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${currentDate}</td>
+                <td>${amount.toFixed(2)} ₹</td>
+                <td>${upi}</td>
+                <td>${orderId}</td>
+            `;
+            historyBody.insertBefore(row, historyBody.firstChild); // Add new entry at the beginning
+        }
+
+        // Function to generate random order ID
+        function generateOrderId() {
+            const orderIdLength = 12;
+            const characters = '0123456789';
+            let orderId = '';
+            for (let i = 0; i < orderIdLength; i++) {
+                orderId += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return orderId;
+        }
+    </script>
+</body>
+</html>
