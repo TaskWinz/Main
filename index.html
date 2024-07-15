@@ -7,17 +7,25 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
         .container {
-            max-width: 600px;
-            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
         }
-        .login-container, .dashboard-container, .captcha-container {
-            border: 1px solid #ccc;
-            padding: 20px;
+        .container h2 {
             margin-bottom: 20px;
+            color: #333;
         }
         .form-container input {
             width: calc(100% - 20px);
@@ -27,31 +35,34 @@
             border-radius: 5px;
         }
         .form-container button {
-            background-color: #4CAF50;
+            background-color: #007bff;
             color: white;
             padding: 10px 20px;
+            margin: 10px 0;
             text-align: center;
-            text-decoration: none;
             display: inline-block;
             font-size: 16px;
             cursor: pointer;
             border: none;
             border-radius: 5px;
+            width: 100%;
         }
         .form-container button:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
         }
         .balance {
             margin-top: 20px;
             font-size: 18px;
+            color: #007bff;
         }
-        .history {
-            text-align: left;
+        .history, .captcha-container, .withdraw-container {
             margin-top: 20px;
+            text-align: left;
         }
         .history table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 10px;
         }
         .history table th, .history table td {
             border: 1px solid #ccc;
@@ -62,6 +73,13 @@
             height: 50px;
             background-color: #ccc;
             margin: 10px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -70,9 +88,11 @@
         <!-- Login Form -->
         <div class="login-container" id="login-form">
             <h2>Login</h2>
-            <input type="email" id="login-email" placeholder="Email" required>
-            <input type="password" id="login-password" placeholder="Password" required>
-            <button onclick="login()">Login</button>
+            <div class="form-container">
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button onclick="login()">Login</button>
+            </div>
         </div>
 
         <!-- Dashboard -->
@@ -86,9 +106,11 @@
             <!-- Withdraw Section -->
             <div class="withdraw-container" id="withdraw-form">
                 <h3>Withdraw</h3>
-                <input type="text" id="upi" placeholder="UPI ID" required>
-                <input type="number" id="withdraw-amount" placeholder="Amount (₹)" required>
-                <button onclick="withdraw()">Withdraw</button>
+                <div class="form-container">
+                    <input type="text" id="upi" placeholder="UPI ID" required>
+                    <input type="number" id="withdraw-amount" placeholder="Amount (₹)" required>
+                    <button onclick="withdraw()">Withdraw</button>
+                </div>
             </div>
 
             <!-- Withdraw History -->
@@ -114,8 +136,10 @@
         <div class="captcha-container" id="captcha-form" style="display: none;">
             <h3>Solve CAPTCHA</h3>
             <div class="captcha-image" id="captcha-image">1234</div> <!-- Simulated CAPTCHA image -->
-            <input type="text" id="captcha-input" placeholder="Enter CAPTCHA" required>
-            <button onclick="submitCaptcha()">Submit</button>
+            <div class="form-container">
+                <input type="text" id="captcha-input" placeholder="Enter CAPTCHA" required>
+                <button onclick="submitCaptcha()">Submit</button>
+            </div>
         </div>
     </div>
 
