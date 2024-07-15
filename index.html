@@ -109,6 +109,42 @@
             margin-top: 20px;
             color: #28a745; /* Green color for success */
         }
+        .withdraw-container {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .withdraw-container h3 {
+            color: #fff;
+        }
+        .withdraw-container .form-container {
+            margin-top: 10px;
+        }
+        .withdraw-container input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #444;
+            color: #fff;
+        }
+        .withdraw-container button {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            margin-top: 10px;
+            text-align: center;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+        .withdraw-container button:hover {
+            background-color: #555;
+        }
     </style>
 </head>
 <body>
@@ -223,42 +259,45 @@
                 loadHistory();
                 generateCaptcha();
             } else {
+                alert('Invalid email or         function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            // Find user in database
+            currentUser = users.find(user => user.email === email && user.password === password);
+            if (currentUser) {
+                alert('Login successful!');
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('user-name').innerText = currentUser.name;
+                updateBalance();
+                loadHistory();
+                generateCaptcha();
+            } else {
                 alert('Invalid email or password. Please try again.');
             }
         }
 
-        function generateCaptcha() {
-            const captchaImage = document.getElementById('captcha-image');
-            const captchaValue = Math.random().toString(36).substr(2, 4).toUpperCase();
-            captchaImage.innerText = captchaValue;
-        }
-
         function submitCaptcha() {
-            if (currentUser) {
-                const captchaInput = document.getElementById('captcha-input').value;
-                const captchaValue = document.getElementById('captcha-image').innerText;
-                if (captchaInput && captchaInput.toUpperCase() === captchaValue) {
-                    const reward = 1; // Reward for solving CAPTCHA
-                    balance += reward;
-                    updateBalance();
-                    addToHistory(reward, 'Success'); // Record as 'Success' status
-                    localStorage.setItem('balance', balance.toString());
-                    document.getElementById('captcha-input').value = ''; // Clear input field
-                    document.getElementById('status-message').innerText = 'CAPTCHA solved successfully!';
-                } else {
-                    document.getElementById('status-message').innerText = 'Invalid CAPTCHA. Please try again.';
-                }
+            const captchaInput = document.getElementById('captcha-input').value;
+
+            if (captchaInput === currentCaptcha) {
+                alert('CAPTCHA solved successfully! You earned 1 ₹.');
+                balance += 1;
+                updateBalance();
+                addToHistory(1, 'CAPTCHA', 'Success');
+                localStorage.setItem('balance', balance.toString());
                 generateCaptcha(); // Generate new CAPTCHA
             } else {
-                                    alert('Please log in first.');
-                generateCaptcha(); // Generate new CAPTCHA
+                alert('Incorrect CAPTCHA. Please try again.');
             }
         }
 
         function withdraw() {
             const upi = document.getElementById('upi').value;
             const amount = parseFloat(document.getElementById('withdraw-amount').value);
-            
+
             if (!currentUser) {
                 alert('Please log in first.');
                 return;
@@ -315,6 +354,33 @@
         function generateOrderId() {
             return 'ORDER-' + Math.random().toString(36).substr(2, 9).toUpperCase();
         }
+
+        function generateCaptcha() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let captcha = '';
+            for (let i = 0; i < 6; i++) {
+                captcha += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            currentCaptcha = captcha;
+            document.getElementById('captcha-image').innerText = captcha;
+        }
+
+        window.onload = function() {
+            const registerForm = document.getElementById('register-form');
+            const loginForm = document.getElementById('login-form');
+            const dashboard = document.getElementById('dashboard');
+
+            if (currentUser) {
+                loginForm.style.display = 'none';
+                dashboard.style.display = 'block';
+                document.getElementById('user-name').innerText = currentUser.name;
+                updateBalance();
+                loadHistory();
+                generateCaptcha();
+            } else {
+                registerForm.style.display = 'block';
+            }
+        };
     </script>
 </body>
 </html>
